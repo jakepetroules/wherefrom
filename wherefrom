@@ -1,0 +1,51 @@
+#!/bin/sh
+set -e
+
+USAGE="Usage: `basename $0` [-hfn] files\n
+\n
+\t-h\tDisplay this help\n
+\t-f\tDisplay filenames before each download URL\n
+\t-n\tOutput no newlines\n"
+PREFIX=''
+SUFFIX='\n'
+
+# Parse options
+while getopts hfn OPT; do
+    case "$OPT" in
+        h)
+            echo $USAGE
+            exit 0
+            ;;
+        f)
+            PREFIX='$file'
+            ;;
+        n)
+            SUFFIX=''
+            ;;
+        \?)
+            echo $USAGE >&2
+            exit 1
+            ;;
+    esac
+done
+
+# Remove options parsed
+shift `expr $OPTIND - 1`
+
+# Need at least one filename
+if [ $# -eq 0 ] ; then
+    echo $USAGE >&2
+    exit 1
+fi
+
+# Display output
+for file in "$@"
+do
+    if [ ! -z "$PREFIX" ] ; then
+        echo "$file: \c"
+    fi
+
+	xattr -p com.apple.metadata:kMDItemWhereFroms "$file" | xxd -r -p | \
+	plutil -convert xml1 -o - - | xmllint --xpath "/plist/array/string/text()" -
+	echo "$SUFFIX\c"
+done
