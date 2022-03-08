@@ -67,7 +67,7 @@ do
         echo "$file: \c"
     fi
 
-	xattr -p com.apple.metadata:kMDItemWhereFroms "$file" | xxd -r -p | \
+	xattr -p -x com.apple.metadata:kMDItemWhereFroms "$file" | xxd -r -p | \
 	plutil -convert xml1 -o - - | xmllint --xpath "/plist/array/string/text()" -
 	echo "$SUFFIX\c"
 done
